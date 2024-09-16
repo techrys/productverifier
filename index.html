@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        /*verified check */
+        @keyframes verifiedAnimation {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .verified-check {
+            animation: verifiedAnimation 1s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center">
+
+    <!-- Main Container -->
+    <div class="max-w-lg w-full bg-gray-800 rounded-lg shadow-lg p-8" x-data="{ 
+        verified: false, 
+        showRegister: false, 
+        showCamera: false, 
+        productSerial: '',
+        verificationMessage: '',
+        registrationMessage: '',
+        name: '',
+        email: '',
+        async verifyProduct() {
+            const response = await fetch('http://localhost:5000/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ product_code: this.productSerial }),
+            });
+            const data = await response.json();
+            this.verified = data.verified;
+            this.verificationMessage = data.message;
+        },
+        async registerProduct() {
+            const response = await fetch('http://localhost:5000/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: this.name,
+                    email: this.email,
+                    product_code: this.productSerial
+                }),
+            });
+            const data = await response.json();
+            this.registrationMessage = data.message;
+            if (data.success) {
+                this.showRegister = false;
+            }
+        }
+    }">
+        
+        <h1 class="text-3xl font-bold text-center text-white mb-6">Verify Your Product</h1>
+        <p class="text-center text-gray-400 text-lg mb-6">To verify, scan the NFC tag, use the camera, or enter the product serial below.</p>
+        
+        <div class="grid grid-cols-3 gap-4 text-center mb-6">
+
+            <div>
+                <i class="fas fa-mobile-alt text-blue-400 text-4xl mb-2 animate-pulse"></i>
+                <p class="text-gray-400 text-sm">Hold phone near NFC tag</p>
+            </div>
+
+            <div>
+                <button @click="showCamera = true" class="bg-blue-600 p-3 rounded-full shadow-lg transition-transform hover:scale-105">
+                    <i class="fas fa-camera text-white text-2xl"></i>
+                </button>
+                <p class="text-gray-400 text-sm mt-2">Scan with camera</p>
+            </div>
+
+            <div>
+                <i class="fas fa-keyboard text-green-400 text-4xl mb-2 animate-pulse"></i>
+                <p class="text-gray-400 text-sm">Enter product serial</p>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <input type="text" placeholder="Enter Product Serial" class="w-full px-4 py-3 bg-gray-700 text-white rounded-md focus:ring-4 focus:ring-blue-500 transition" x-model="productSerial">
+            <button @click="verifyProduct()" class="w-full mt-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md shadow-lg transition-transform hover:scale-105">
+                Verify Product
+            </button>
+        </div>
+
+        <div x-show="verificationMessage" x-text="verificationMessage" class="text-center mb-4" :class="verified ? 'text-green-500' : 'text-red-500'"></div>
+
+        <template x-if="verified">
+            <div class="verified-check text-center">
+                <i class="fas fa-check-circle text-green-500 text-5xl mb-4"></i>
+                <p class="text-xl font-bold">Product Verified!</p>
+                <button @click="showRegister = true" class="mt-4 py-2 px-6 bg-blue-600 hover:bg-blue-700 rounded-md text-white shadow-lg transition-transform hover:scale-105">
+                    Register Product
+                </button>
+            </div>
+        </template>
+
+        <template x-if="showCamera">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 flex justify-center items-center z-50">
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg text-center">
+                    <h2 class="text-3xl font-bold mb-4">Scan Product Code</h2>
+                    <p class="text-gray-400 mb-4">Use your camera to scan the product's QR code or NFC tag.</p>
+                    <!-- QR Code Image -->
+                    <img src="https://via.placeholder.com/150" alt="QR Code" class="mx-auto mb-4 w-32 h-32">
+                    <button @click="showCamera = false" class="bg-blue-600 px-4 py-2 rounded-md text-white hover:bg-blue-700 transition">Close</button>
+                </div>
+            </div>
+        </template>
+
+        <!-- Register Product -->
+        <template x-if="showRegister">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 flex justify-center items-center z-50">
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg text-center w-full max-w-md">
+                    <h2 class="text-3xl font-bold mb-4">Register Your Product</h2>
+                    <form @submit.prevent="registerProduct()">
+                        <div class="mb-4">
+                            <label class="block text-gray-400 mb-2">Full Name</label>
+                            <input type="text" x-model="name" class="w-full px-4 py-3 bg-gray-700 text-white rounded-md focus:ring-4 focus:ring-green-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-400 mb-2">Email</label>
+                            <input type="email" x-model="email" class="w-full px-4 py-3 bg-gray-700 text-white rounded-md focus:ring-4 focus:ring-green-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-400 mb-2">Serial Number</label>
+                            <input type="text" x-model="productSerial" class="w-full px-4 py-3 bg-gray-700 text-white rounded-md focus:ring-4 focus:ring-green-500" readonly>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-green-600 hover:bg-green-700 rounded-md text-white font-bold shadow-lg transition-transform hover:scale-105">Submit</button>
+                    </form>
+                    <div x-show="registrationMessage" x-text="registrationMessage" class="mt-4 text-green-500"></div>
+                    <button @click="showRegister = false" class="mt-4 text-gray-400 hover:text-gray-200 transition">Cancel</button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- AlpineJS for interactivity -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.9.1/dist/cdn.min.js"></script>
+
+</body>
+</html>
