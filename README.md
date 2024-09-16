@@ -73,7 +73,6 @@
 - Implement rate limiting
 - Consider using a database for storing product codes
 - Add authentication for admin operations
-).
 
 ## 📜 License
 
