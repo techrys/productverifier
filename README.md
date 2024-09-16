@@ -60,9 +60,9 @@
 
 ## 📸 Screenshots
 
-[Verification Page](https://github.com/user-attachments/assets/3d1eca09-0aa4-40fb-aa97-17cd5a6f92f3)
+![Screenshot 2024-09-15 183233](https://github.com/user-attachments/assets/91a2c454-ddb6-4cc3-a429-a9ccb149d37e)
 
-## 🛠️ Configuration
+
 
 - Update `PRODUCT_CODES_FILE` in `app.py` to point to your secure product codes file.
 - Modify API endpoints in `index.html` if your backend is hosted at a different URL.
